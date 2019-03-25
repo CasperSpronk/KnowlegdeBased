@@ -89,9 +89,13 @@ def create_neural_network(network_input):
     hidden_layer1 = fully_connected_network_layer(name='hidden1',
                                                   input_tensor=blanked_out_input,
                                                   size=100,
-                                                  activation_function='linear')
+                                                  activation_function='relu')
+    hidden_layer2 = fully_connected_network_layer(name='hidden2',
+                                                  input_tensor=hidden_layer1,
+                                                  size=100,
+                                                  activation_function='relu')
     prediction = fully_connected_network_layer(name='output',
-                                               input_tensor=hidden_layer1,
+                                               input_tensor=hidden_layer2,
                                                size=TARGET_SIZE,
                                                activation_function='linear')
     return prediction
