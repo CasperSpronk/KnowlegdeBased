@@ -2,12 +2,12 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 
-TRAIN_EPOCHS = 100  # The number of times the complete dataset is used to during training
-BATCH_SIZE = 64  # Number of examples to use for calculating the gradient
+TRAIN_EPOCHS = 200  # The number of times the complete dataset is used to during training
+BATCH_SIZE = 16  # Number of examples to use for calculating the gradient
 LEARNING_RATE = 1e-3  # Scales the size of the parameter updates
 L2_WEIGHT_LOSS = 0e-3  # Penalty on the size of the parameters, used for regularization
 
-REPORT_INTERVAL = 10  # Report the learning progress once every number of epochs
+REPORT_INTERVAL = 20  # Report the learning progress once every number of epochs
 
 TARGET_SIZE = 1  # Do not change this
 FEATURES = 11  # Do not change this
