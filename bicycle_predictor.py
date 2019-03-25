@@ -2,8 +2,8 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 
-TRAIN_EPOCHS = 100  # The number of times the complete dataset is used to during training
-BATCH_SIZE = 64  # Number of examples to use for calculating the gradient
+TRAIN_EPOCHS = 400  # The number of times the complete dataset is used to during training
+BATCH_SIZE = 8  # Number of examples to use for calculating the gradient
 LEARNING_RATE = 1e-3  # Scales the size of the parameter updates
 L2_WEIGHT_LOSS = 0e-3  # Penalty on the size of the parameters, used for regularization
 
@@ -90,6 +90,30 @@ def create_neural_network(network_input):
                                                   input_tensor=blanked_out_input,
                                                   size=100,
                                                   activation_function='relu')
+    # hidden_layer3 = fully_connected_network_layer(name='hidden3',
+    #                                               input_tensor=hidden_layer1,
+    #                                               size=100,
+    #                                               activation_function='linear')
+    # hidden_layer4 = fully_connected_network_layer(name='hidden4',
+    #                                               input_tensor=hidden_layer3,
+    #                                               size=100,
+    #                                               activation_function='linear')
+    # hidden_layer5 = fully_connected_network_layer(name='hidden5',
+    #                                               input_tensor=hidden_layer4,
+    #                                               size=100,
+    #                                               activation_function='linear')
+    # hidden_layer6 = fully_connected_network_layer(name='hidden6',
+    #                                               input_tensor=hidden_layer5,
+    #                                               size=100,
+    #                                               activation_function='linear')
+    # hidden_layer7 = fully_connected_network_layer(name='hidden7',
+    #                                               input_tensor=hidden_layer6,
+    #                                               size=100,
+    #                                               activation_function='linear')
+    # hidden_layer8 = fully_connected_network_layer(name='hidden8',
+    #                                               input_tensor=hidden_layer7,
+    #                                               size=100,
+    #                                               activation_function='linear')
     hidden_layer2 = fully_connected_network_layer(name='hidden2',
                                                   input_tensor=hidden_layer1,
                                                   size=100,
@@ -323,6 +347,6 @@ if __name__ == '__main__':
 
         # model.largest_data_point_errors() # print the dates and times on which the model makes
         # the largest errors.
-
+        # model.largest_data_point_errors()
     plt.ioff()
     plt.show()  # to prevent the figure from being closed when the script end
