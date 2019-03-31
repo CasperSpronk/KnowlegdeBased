@@ -67,6 +67,7 @@ for pp = 1:length(pc)
 end
 
 if any((pd < 1) | (pd > par.pos_states) | (pd-fix(pd) ~= 0))
+    pd
     error('Position discretization out of bounds, check discretize_state/s(1)');
 end
 

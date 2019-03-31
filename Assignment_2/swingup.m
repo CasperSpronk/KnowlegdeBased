@@ -119,34 +119,69 @@ function par = get_parameters(par)
     % TODO: set the values
     par.epsilon = 0.1;      % Random action rate
     par.gamma = 0.99;       % Discount rate
-    par.alpha = 0;          % Learning rate
-    par.pos_states = 0;     % Position discretization
-    par.vel_states = 0;     % Velocity discretization
-    par.actions = 0;        % Action discretization
-    par.trials = 0;         % Learning trials
+    par.alpha = 0.25;       % Learning rate
+    par.pos_states = 30;    % Position discretization
+    par.vel_states = 30;    % Velocity discretization
+    par.actions = 5;        % Action discretization
+    par.trials = 200;       % Learning trials
 end
 
 function Q = init_Q(par)
     % TODO: Initialize the Q table.
+    Q = zeros(par.pos_states,par.vel_states,par.actions);
 end
 
 function s = discretize_state(x, par)
     % TODO: Discretize state. Note: s(1) should be
     % TODO: position, s(2) velocity.
+    positionRange = (pi/15)*par.pos_states;
+    %modulate position between edge posibilities
+    position = mod(x(1),positionRange); %modulate position between -2pi and 2pi
+    position = position / positionRange;% set position value between 0 and 1
+    discreet_position = ceil(position * par.pos_states); % set position to values between 1 and par.pos_states
+    % set discreet position to 1 if position was equal to exactly 0
+    if discreet_position == 0
+        discreet_position = 1;
+    end
+    %clip to edge velocity
+    velocityEdge = (pi/3)*par.vel_states/2; % set velocity edge
+    velocity = x(2);
+    velocity(velocity > velocityEdge) = velocityEdge; % set velocities that exceed the max velocity to the max velocity
+    velocity(velocity < -velocityEdge) = -velocityEdge; % set velocities that exceed the min velocity to the min velocity
+    velocity = (velocity + velocityEdge)/(2*velocityEdge); % set velocity value between 0 and 1
+    discreet_velocity = ceil(velocity * par.vel_states); % set position to values between 1 and par.vel_states
+    if discreet_velocity == 0 % makes sure that a velocity value of exaclty -5*pi will be in range of par.vel_states 
+        discreet_velocity = 1;
+    end
+    %return value
+    s = [discreet_position, discreet_velocity];
 end
 
 function u = take_action(a, par)
     % TODO: Calculate the proper torque for action a. This cannot
     % TODO: exceed par.maxtorque.
+    a = a - par.actions/2 - 0.5; % splits actions into positve and negative torque
+    a = a / (par.actions / 2 - 0.5); % sets actions to range between -1 and 1 
+    u = a * par.maxtorque; % multiplies by maxtorque to set the value of the torque
 end
 
 function r = observe_reward(a, sP, par)
     % TODO: Calculate the reward for taking action a,
     % TODO: resulting in state sP.
+    if sP(1) == 15 && sP(2) == 15
+        r = 10;
+    else
+        r = 0;
+    end
 end
 
 function t = is_terminal(sP, par)
     % TODO: Return 1 if state sP is terminal, 0 otherwise.
+    if sP(1) == 15 && sP(2) == 15
+        t = 1;
+    else
+        t = 0;
+    end
 end
 
 
