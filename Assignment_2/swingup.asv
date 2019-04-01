@@ -167,7 +167,7 @@ end
 function r = observe_reward(a, sP, par)
     % TODO: Calculate the reward for taking action a,
     % TODO: resulting in state sP.
-    if sP(1) == par.pos_states/2 && sP(2) == par.vel_states/2
+    if sP(1) == 15 && sP(2) == 15
         r = 10;
     else
         r = 0;
@@ -176,7 +176,7 @@ end
 
 function t = is_terminal(sP, par)
     % TODO: Return 1 if state sP is terminal, 0 otherwise.
-    if sP(1) == par.pos_states/2 && sP(2) == par.vel_states/2
+    if sP(1) == 15 && sP(2) == 15
         t = 1;
     else
         t = 0;
