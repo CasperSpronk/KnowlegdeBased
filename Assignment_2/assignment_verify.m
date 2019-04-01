@@ -124,7 +124,7 @@ ylabel('Applied torque');
 disp('...Action execution is within bounds');
 
 %% Reward observation
-r = learner.observe_reward(1, s, par);
+r = learner.observe_reward(1, s, par, Q);
 if isempty(r)
     error('Reward observation unimplemented, check observe_reward');
 end
@@ -134,7 +134,7 @@ for pp = 1:par.pos_states
     for vv = 1:par.vel_states
         for aa = 1:par.actions
             s = [pp vv];
-            r(pp,vv,aa) = learner.observe_reward(aa, s, par);
+            r(pp,vv,aa) = learner.observe_reward(aa, s, par, Q);
         end
     end
 end

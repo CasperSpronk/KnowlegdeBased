@@ -11,7 +11,8 @@ function [par, ta, xa] = swingup(par)
         par = get_parameters(par);
         
 		% TODO: Initialize the outer loop
-
+        Q = init_Q(par);
+           
         % Initialize bookkeeping (for plotting only)
         ra = zeros(par.trials, 1);
         tta = zeros(par.trials, 1);
@@ -21,25 +22,34 @@ function [par, ta, xa] = swingup(par)
         for ii = 1:par.trials
 
             % TODO: Initialize the inner loop
-
+            x = swingup_initial_state();
+            s = discretize_state(x, par);
             % Inner loop: simulation steps
             for tt = 1:ceil(par.simtime/par.simstep)
                 
                 % TODO: obtain torque
+              
+                a = execute_policy(Q, s, par);
+                u = take_action(a, par);
                 
                 % Apply torque and obtain new state
                 % x  : state (input at time t and output at time t+par.simstep)
                 % u  : torque
                 % te : new time
                 [te, x] = body_straight([te te+par.simstep],x,u,par);
-
-                % TODO: learn
-                % use s for discretized state
+                sP = discretize_state(x, par);
+                aP = a;
                 
+                % TODO: learn
+                r = observe_reward(a, sP, par, Q);
+                Q = update_Q(Q, s, a, r, sP, aP, par);
+                % use s for discretized state
+                reward = r;
                 % Keep track of cumulative reward
                 ra(ii) = ra(ii)+reward;
 
                 % TODO: check termination condition
+                t = is_terminal(sP, par);
             end
 
             tta(ii) = tta(ii) + tt*par.simstep;
@@ -117,6 +127,7 @@ end
 % ******************************************************************
 function par = get_parameters(par)
     % TODO: set the values
+    % DONE
     par.epsilon = 0.1;      % Random action rate
     par.gamma = 0.99;       % Discount rate
     par.alpha = 0.25;       % Learning rate
@@ -128,12 +139,15 @@ end
 
 function Q = init_Q(par)
     % TODO: Initialize the Q table.
+    % DONE
     Q = zeros(par.pos_states,par.vel_states,par.actions);
+    Q(par.pos_states/2, par.vel_states/2, 3) = 10;
 end
 
 function s = discretize_state(x, par)
     % TODO: Discretize state. Note: s(1) should be
     % TODO: position, s(2) velocity.
+    % DONE
     positionRange = (pi/15)*par.pos_states;
     %modulate position between edge posibilities
     position = mod(x(1),positionRange); %modulate position between 0 and 2pi
@@ -160,22 +174,22 @@ end
 function u = take_action(a, par)
     % TODO: Calculate the proper torque for action a. This cannot
     % TODO: exceed par.maxtorque.
+    % DONE
     potentialActions = linspace(-par.maxtorque,par.maxtorque,par.actions);
     u = potentialActions(a);
 end
 
-function r = observe_reward(a, sP, par)
+function r = observe_reward(a, sP, par, Q)   
     % TODO: Calculate the reward for taking action a,
     % TODO: resulting in state sP.
-    if sP(1) == par.pos_states/2 && sP(2) == par.vel_states/2
-        r = 10;
-    else
-        r = 0;
-    end
+    % 
+    
+    r = Q(sP(1), sP(2), a);
 end
 
 function t = is_terminal(sP, par)
     % TODO: Return 1 if state sP is terminal, 0 otherwise.
+    % DONE
     if sP(1) == par.pos_states/2 && sP(2) == par.vel_states/2
         t = 1;
     else
@@ -187,9 +201,27 @@ end
 function a = execute_policy(Q, s, par)
     % TODO: Select an action for state s using the
     % TODO: epsilon-greedy algorithm.
+    if rand() <= par.epsilon
+        a = randi([1,par.actions],1);
+        return
+    end
+    potentialActions = Q(s(1),s(2),:);
+    possibleActions = [];
+    bestReward = 0;
+    for i = 1:par.actions
+        if potentialActions(i) > bestReward
+            possibleActions = i;
+            bestReward = potentialActions(:,:,i);
+        elseif potentialActions(i) == bestReward
+            possibleActions(length(possibleActions) + 1) = i;
+        end
+    end
+    a = possibleActions(randi([1,length(possibleActions)],1));
 end
 
 function Q = update_Q(Q, s, a, r, sP, aP, par)
     % TODO: Implement the SARSA update rule.
+    update = par.alpha * (r + par.gamma * Q(sP(1),sP(2),aP) - Q(s(1),s(2),a));
+    Q(s(1) ,s(2) ,a) = Q(s(1),s(2),a) + update;
 end
 
