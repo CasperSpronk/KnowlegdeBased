@@ -12,7 +12,7 @@ function [par, ta, xa] = swingup(par)
         
 		% TODO: Initialize the outer loop
         Q = init_Q(par);
-           
+        
         % Initialize bookkeeping (for plotting only)
         ra = zeros(par.trials, 1);
         tta = zeros(par.trials, 1);
@@ -24,12 +24,12 @@ function [par, ta, xa] = swingup(par)
             % TODO: Initialize the inner loop
             x = swingup_initial_state();
             s = discretize_state(x, par);
+            a = execute_policy(Q, s, par);
+            reward = 0;
             % Inner loop: simulation steps
             for tt = 1:ceil(par.simtime/par.simstep)
                 
                 % TODO: obtain torque
-              
-                a = execute_policy(Q, s, par);
                 u = take_action(a, par);
                 
                 % Apply torque and obtain new state
@@ -37,19 +37,25 @@ function [par, ta, xa] = swingup(par)
                 % u  : torque
                 % te : new time
                 [te, x] = body_straight([te te+par.simstep],x,u,par);
-                sP = discretize_state(x, par);
+                sP = s;
                 aP = a;
+                s = discretize_state(x, par);
+                a = execute_policy(Q, s, par);
                 
                 % TODO: learn
-                r = observe_reward(a, sP, par, Q);
+                
+                r = observe_reward(a, s, par, Q);
+                
                 Q = update_Q(Q, s, a, r, sP, aP, par);
-                % use s for discretized state
-                reward = r;
+                                               
+                %reward = r;
                 % Keep track of cumulative reward
-                ra(ii) = ra(ii)+reward;
+                ra(ii) = ra(ii); %+ reward;
 
                 % TODO: check termination condition
-                t = is_terminal(sP, par);
+                if is_terminal(sP, par)
+                    break;
+                end
             end
 
             tta(ii) = tta(ii) + tt*par.simstep;
@@ -128,7 +134,7 @@ end
 function par = get_parameters(par)
     % TODO: set the values
     % DONE
-    par.epsilon = 0.1;      % Random action rate
+    par.epsilon = 0.5;      % Random action rate
     par.gamma = 0.99;       % Discount rate
     par.alpha = 0.25;       % Learning rate
     par.pos_states = 30;    % Position discretization
@@ -140,7 +146,21 @@ end
 function Q = init_Q(par)
     % TODO: Initialize the Q table.
     % DONE
-    Q = zeros(par.pos_states,par.vel_states,par.actions);
+    Q = ones(par.pos_states,par.vel_states,par.actions);
+%     for i = par.pos_states/2:par.pos_states
+%         for j = 1:par.vel_states/2
+%             for k = 1:par.actions/2
+%                 Q(i,j,k) = 2;
+%             end
+%         end
+%     end  
+%     for i = 1:par.pos_states/2
+%         for j = par.vel_states/2:par.pos_states
+%             for k = 3:par.actions
+%                 Q(i,j,k) = 2;
+%             end
+%         end
+%     end 
     Q(par.pos_states/2, par.vel_states/2, 3) = 10;
 end
 
@@ -182,8 +202,6 @@ end
 function r = observe_reward(a, sP, par, Q)   
     % TODO: Calculate the reward for taking action a,
     % TODO: resulting in state sP.
-    % 
-    
     r = Q(sP(1), sP(2), a);
 end
 
@@ -216,7 +234,11 @@ function a = execute_policy(Q, s, par)
             possibleActions(length(possibleActions) + 1) = i;
         end
     end
-    a = possibleActions(randi([1,length(possibleActions)],1));
+    if isempty(possibleActions)
+        a = randi([1,par.actions],1);
+    else
+        a = possibleActions(randi([1 length(possibleActions)],1));
+    end
 end
 
 function Q = update_Q(Q, s, a, r, sP, aP, par)
