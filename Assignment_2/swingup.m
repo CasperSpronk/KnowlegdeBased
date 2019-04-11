@@ -138,7 +138,7 @@ function par = get_parameters(par)
     par.pos_states = 30;    % Position discretization
     par.vel_states = 30;    % Velocity discretization
     par.actions = 5;        % Action discretization
-    par.trials = 2000;      % Learning trials
+    par.trials = 6000;      % Learning trials
 end
 
 function Q = init_Q(par)
@@ -314,9 +314,8 @@ end
 function a = execute_policy(Q, s, par)
     % TODO: Select an action for state s using the
     % TODO: epsilon-greedy algorithm.
-    disp("new action")
-    if rand() <= par.epsilon
-        disp("random action chosen please ignore")
+    rand_int = rand();
+    if rand_int <= par.epsilon
         a = randi([1,par.actions],1);
         return
     end
@@ -336,16 +335,6 @@ function a = execute_policy(Q, s, par)
     else
         a = possibleActions(randi([1 length(possibleActions)],1));
     end
-    
-    disp("s = "+ s)
-    disp("Q(s,a) = " + Q(s(1),s(2),a))
-    disp("action = " + a)
-    disp("end of action")
-    newline
-    
-    
-    
-    
 end
 
 function Q = update_Q(Q, s, a, r, sP, aP, par)
