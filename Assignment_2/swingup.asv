@@ -341,7 +341,6 @@ function a = execute_policy(Q, s, par)
     disp("Q(s,a) = " + Q(s(1),s(2),a))
     disp("action = " + a)
     disp("end of action")
-    newline
     
     
     
